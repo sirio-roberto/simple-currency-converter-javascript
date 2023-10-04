@@ -16,7 +16,7 @@ const currencies = [
 ]
 
 function getCurrencyNames() {
-  return currencies.map(c => c.name);
+  return currencies.map(c => c.name).flatMap(name => name.split(":"));
 }
 
 function validateCurrencyName(toCurrency) {
@@ -37,7 +37,23 @@ function validateCurrencyAmount(amount) {
 }
 
 function convertAmount(fromCurrency, toCurrency, amount) {
-  const rate = currencies.find(c => c.name === toCurrency).rateFromUSD;
+  let currency = currencies.find(c => c.from === fromCurrency && c.to === toCurrency);
+  let rate;
+  if (currency === undefined) {
+    // if we are handling any USD conversion, that will be easier, so let's start with that
+    if (toCurrency === "USD") {
+      const invertedRate = currencies.find(c => c.to === fromCurrency && c.from === toCurrency).rate;
+      rate = 1 / invertedRate;
+    } else {
+      // worst scenario, where we are not handling any USD currency, so we will need triangulation
+      // first we need to convert the fromCurrency to USD and then get the rate based on that
+      const USDFromRate = currencies.find(c => c.from === "USD" && c.to === fromCurrency).rate;
+      rate = currencies.find(c => c.from === "USD" && c.to === toCurrency).rate;
+      rate /= USDFromRate;
+    }
+  } else {
+    rate = currency.rate;
+  }
   const result = rate * amount;
   return result.toFixed(4);
 }
@@ -45,22 +61,26 @@ function convertAmount(fromCurrency, toCurrency, amount) {
 function main() {
   console.log("Welcome to Currency Converter!");
   currencies.forEach(c => console.log(`1 ${c.from} equals ${c.rate} ${c.to}`));
-  console.log("I can convert USD to these currencies: " + "JPY, EUR, RUB, USD, GBP"); // change it later back to getCurrencyNames
-  let fromCurrency = "USD";
-  console.log("Type the currency you wish to convert: " + fromCurrency);
+  console.log("What do you want to convert?");
 
-  let toCurrency = input("To: ").toUpperCase();
-  let errorMsg = validateCurrencyName(toCurrency);
+  let fromCurrency = input("From: ").toUpperCase();
+  let errorMsg = validateCurrencyName(fromCurrency);
   if (errorMsg) {
     console.log(errorMsg);
   } else {
-    let amount = Number(input("Amount: "));
-    errorMsg = validateCurrencyAmount(amount);
+    let toCurrency = input("To: ").toUpperCase();
+    errorMsg = validateCurrencyName(toCurrency);
     if (errorMsg) {
       console.log(errorMsg);
     } else {
-      const convertedAmount = convertAmount(fromCurrency, toCurrency, amount);
-      console.log(`Result: ${amount} ${fromCurrency} equals ${convertedAmount} ${toCurrency}`);
+      let amount = Number(input("Amount: "));
+      errorMsg = validateCurrencyAmount(amount);
+      if (errorMsg) {
+        console.log(errorMsg);
+      } else {
+        const convertedAmount = convertAmount(fromCurrency, toCurrency, amount);
+        console.log(`Result: ${amount} ${fromCurrency} equals ${convertedAmount} ${toCurrency}`);
+      }
     }
   }
 }
