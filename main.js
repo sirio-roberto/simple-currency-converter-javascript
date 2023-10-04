@@ -58,9 +58,14 @@ function convertAmount(fromCurrency, toCurrency, amount) {
   return result.toFixed(4);
 }
 
-function main() {
-  console.log("Welcome to Currency Converter!");
-  currencies.forEach(c => console.log(`1 ${c.from} equals ${c.rate} ${c.to}`));
+function validateOptionsInput(userInput) {
+  if (userInput !== "1" && userInput !== "2") {
+    return "Unknown input";
+  }
+  return "";
+}
+
+function showConversionMenu() {
   console.log("What do you want to convert?");
 
   let fromCurrency = input("From: ").toUpperCase();
@@ -83,6 +88,26 @@ function main() {
       }
     }
   }
+}
+
+function main() {
+  console.log("Welcome to Currency Converter!");
+  currencies.forEach(c => console.log(`1 ${c.from} equals ${c.rate} ${c.to}`));
+  let userInput;
+  do {
+    console.log("What do you want to do?");
+    userInput = input("1-Convert currencies 2-Exit program\n");
+    let errorMsg = validateOptionsInput(userInput);
+    if (errorMsg) {
+      console.log(errorMsg);
+    } else if (userInput === "1") {
+      showConversionMenu();
+    } else {
+      break;
+    }
+  } while (true);
+
+  console.log("Have a nice day!");
 }
 
 main();
