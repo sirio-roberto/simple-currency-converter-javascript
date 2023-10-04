@@ -1,16 +1,18 @@
 const input = require("sync-input");
 
-function Currency(name, rateFromUSD) {
+function Currency(name, from, to, rate) {
   this.name = name;
-  this.rateFromUSD = rateFromUSD;
+  this.from = from;
+  this.to = to;
+  this.rate = rate;
 }
 
 const currencies = [
-  new Currency("USD", 1.0),
-  new Currency("JPY", 113.5),
-  new Currency("EUR", 0.89),
-  new Currency("RUB",  	74.36),
-  new Currency("GBP", 0.75),
+  new Currency("USD:USD", "USD", "USD", 1.0),
+  new Currency("USD:JPY", "USD", "JPY", 113.5),
+  new Currency("USD:EUR", "USD", "EUR",  0.89),
+  new Currency("USD:RUB", "USD", "RUB",  	74.36),
+  new Currency("USD:GBP", "USD", "GBP",  0.75),
 ]
 
 function getCurrencyNames() {
@@ -42,7 +44,7 @@ function convertAmount(fromCurrency, toCurrency, amount) {
 
 function main() {
   console.log("Welcome to Currency Converter!");
-  currencies.forEach(c => console.log(`1 USD equals ${c.rateFromUSD} ${c.name}`));
+  currencies.forEach(c => console.log(`1 ${c.from} equals ${c.rate} ${c.to}`));
   console.log("I can convert USD to these currencies: " + "JPY, EUR, RUB, USD, GBP"); // change it later back to getCurrencyNames
   let fromCurrency = "USD";
   console.log("Type the currency you wish to convert: " + fromCurrency);
